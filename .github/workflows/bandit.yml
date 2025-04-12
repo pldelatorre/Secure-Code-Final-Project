@@ -10,9 +10,9 @@ on:
 jobs:
   bandit:
     permissions:
-      contents: write
+      contents: read
       actions: read
-      security-events: write
+      statuses: write
 
     runs-on: ubuntu-latest
     steps:
