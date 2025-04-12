@@ -1,4 +1,4 @@
-name: Lint Checks
+name: Super Linter
 
 on:
   push:
@@ -6,43 +6,20 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-  pull-requests: read
-
 jobs:
-  super-linter:
-    name: Run Super-Linter
+  lint:
+    name: Lint Code Base
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Run Super-Linter
-      uses: github/super-linter@v6
-      env:
-        DEFAULT_BRANCH: main
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        VALIDATE_ALL_CODEBASE: true
-        VALIDATE_PYTHON: true
-        VALIDATE_BANDIT: false # ⛔ skip Bandit here
-
-bandit:
-  name: Run Bandit Security Scan
-  runs-on: ubuntu-latest
-
-  steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
-    - name: Install Bandit
-      run: pip install bandit
-
-    - name: Run Bandit
-      run: bandit -r . -c .bandit.yml
+      - name: Run Super-Linter
+        uses: github/super-linter@v6
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_PYTHON: true
+          VALIDATE_BANDIT: true # ✅ enables Bandit linting
+          PYTHON_BANDIT_CONFIG_FILE: .bandit.yml # optional if you have a config
