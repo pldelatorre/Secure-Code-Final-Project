@@ -10,7 +10,7 @@ on:
 jobs:
   bandit:
     permissions:
-      contents: read
+      contents: write
       actions: read
 
     runs-on: ubuntu-latest
