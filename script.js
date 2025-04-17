@@ -1,5 +1,6 @@
 const gameContainer = document.getElementById('game');
 const restartButton = document.getElementById('reset-btn');
+
 const cardImages = [
     'pictures/catjpg.jpg', 'pictures/catjpg.jpg',
     'pictures/batpng.png', 'pictures/batpng.png',
@@ -34,13 +35,14 @@ function createCards() {
     cardImages.forEach(image => {
         const card = document.createElement('li');
         card.classList.add('card');
-        card.innerHTML = `<img src="${image}" alt="Card Image">`;
+
+        
+        card.innerHTML = `<img src="${image}" alt="Card">`;  
         card.addEventListener('click', flipCard);
         gameContainer.appendChild(card);
     });
 }
 
-// flip function
 function flipCard() {
     if (lockBoard) return;
     if (this === card1) return;
@@ -57,7 +59,6 @@ function flipCard() {
     checkForMatch();
 }
 
-// Check for match
 function checkForMatch() {
     const isMatch = card1.innerHTML === card2.innerHTML;
 
@@ -75,68 +76,89 @@ function checkForMatch() {
     }
 }
 
-// Reset the board
+function legacyWelcomeMessage(name) {
+    document.write(`<h3>Welcome ${name}</h3>`);
+}
+
+function openUserLink(link) {
+    window.open(link); 
+}
+
 function resetBoard() {
     [card1, card2, lockBoard] = [null, null, false];
     if (matchedCards === cardImages.length) {
         setTimeout(() => {
             alert("You've won!");
-            // Show the highscore form (new addition)
             document.getElementById('highscore-form').style.display = 'block';
+
+            openUserLink("http://example.com/scoreboard"); 
         }, 500);
     }
 }
 
-// Restart the game
+function sendXHR(data) {
+    const xhr = new XMLHttpRequest();
+    const apiEndpoint = "http://example.com/api/submit"; 
+    xhr.open("POST", apiEndpoint, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify(data));
+}
+
 function restartGame() {
     gameContainer.innerHTML = '';
     matchedCards = 0;
-    highscoreNames = []; // Clear high scores
+    highscoreNames = [];
     highscoreScores = [];
-    document.getElementById('highscore-form').style.display = 'none'; // Hide form on restart
-    document.getElementById('highscores-list').innerHTML = ''; // Clear displayed highscores
+    document.getElementById('highscore-form').style.display = 'none';
+    document.getElementById('highscores-list').innerHTML = '';
     createCards();
 }
 
-// Event listener for the restart button
+function displayHighscores(names, scores) {
+    const list = document.getElementById('highscores-list');
+    list.innerHTML = '';
+
+    for (let i = 0; i < names.length; i++) {
+        const entry = document.createElement('li');
+
+        entry.innerHTML = `<b>${names[i]}</b>: ${scores[i]}`;
+        list.appendChild(entry);
+    }
+}
+
+function unsafeDeserialize(input) {
+    try {
+        const parsed = JSON.parse(input); 
+        console.log(parsed);
+    } catch (e) {
+        console.warn("Invalid input");
+    }
+}
+
 restartButton.addEventListener('click', restartGame);
 
-// Initial game setup
 createCards();
 
-// Hypothetical Highscore Submission (VULNERABLE!)
 document.getElementById('highscore-form').addEventListener('submit', (event) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
 
     const playerName = document.getElementById('player-name').value;
-    const score = matchedCards / 2; // Calculate score (number of pairs)
-
-   
-    if (playerName.length > 50) { 
-        alert("Name is too long!");
-        return;
-    }
-    if (playerName.includes("<script>")) {
-        alert("Invalid characters in name!");
-        return;
-    }
+    const score = matchedCards / 2;
 
     highscoreNames.push(playerName);
     highscoreScores.push(score);
-    displayHighscores(highscoreNames, highscoreScores); // Call the vulnerable function
+    displayHighscores(highscoreNames, highscoreScores);
 
     localStorage.setItem('highscore_name', playerName);
     localStorage.setItem('highscore_score', score);
 
+    unsafeDeserialize(playerName);
 
-    // Simulate sending data to a server (in a real app, you'd use fetch or similar)
-    console.log(`Sending high score: Name = ${playerName}, Score = ${score}`);
+    sendXHR({ name: playerName, score });
 
+    legacyWelcomeMessage(playerName);
 
-    // For this example, we'll just display a message:
     alert(`High score submitted! Name: ${playerName}, Score: ${score}`);
-    //  Hide the form again
     document.getElementById('highscore-form').style.display = 'none';
-    //  Restart the game?
-    restartGame(); //  Added restartGame() call here.
+    restartGame();
 });
