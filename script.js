@@ -29,6 +29,7 @@ function shuffle(array) {
     }
 }
 
+// The innerHTML can be exposed to HTML injection.
 // Create the cards
 function createCards() {
     shuffle(cardImages);
@@ -76,10 +77,12 @@ function checkForMatch() {
     }
 }
 
+// The name input here is not being validated or sanitized, leaving it vulnerable to XSS.
 function legacyWelcomeMessage(name) {
     document.write(`<h3>Welcome ${name}</h3>`);
 }
 
+// The link parameter in this function is not being sanitized which could potentially be exposed to URL injection or XSS.
 function openUserLink(link) {
     window.open(link); 
 }
@@ -96,6 +99,7 @@ function resetBoard() {
     }
 }
 
+// The api endpoint is using http which is not secure, URL should be using HTTPS for data encryption.
 function sendXHR(data) {
     const xhr = new XMLHttpRequest();
     const apiEndpoint = "http://example.com/api/submit"; 
@@ -126,6 +130,7 @@ function displayHighscores(names, scores) {
     }
 }
 
+// The user input is not being sanitized here and is vulnerable to XSS.
 function unsafeDeserialize(input) {
     try {
         const parsed = JSON.parse(input); 
